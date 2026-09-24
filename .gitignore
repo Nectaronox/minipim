@@ -1,0 +1,4 @@
+sim/*.vvp
+sim/*.vcd
+sim/*.hex
+__pycache__/
