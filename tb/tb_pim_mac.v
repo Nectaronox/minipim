@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 module tb_pim_mac;
   localparam DATA_W = 8, ACC_W = 32;
+  localparam TIMEOUT = 100000;
 
   reg clk = 1'b0, rst_n = 1'b0;
   always #5 clk = ~clk;
@@ -40,14 +41,13 @@ module tb_pim_mac;
         $display("[%0t] MISMATCH n=%0d acc=%0d exp=%0d", $time, n, acc, exp_acc);
       end
     end
-    if (errors == 0) $display("PASS"); else $display("FAIL (%0d errors)", errors);
 
-    for (n = 0; n<20; n = n + 2) begin
-      for (i=0;i <32; i=i+3) begin
+    for (n = 0; n < 20; n = n + 2) begin
+      for (i = 0; i < 32; i = i + 3) begin
         ta = $random; tb = $random;
-        if (n==0) begin ta = -128; tb = -128; end
-        a  <= ta; b <= tb; en <= 1'b1; first <= (i==0);
-        exp_acc = (i==0) ? ta * tb : exp_acc + ta * tb;
+        if (n == 0) begin ta = -128; tb = -128; end
+        a <= ta; b <= tb; en <= 1'b1; first <= (i == 0);
+        exp_acc = (i == 0) ? ta * tb : exp_acc + ta * tb;
         @(posedge clk);
       end
       en <= 1'b0; first <= 1'b0;
@@ -58,6 +58,13 @@ module tb_pim_mac;
       end
     end
     if (errors == 0) $display("PASS"); else $display("FAIL (%0d errors)", errors);
+    $finish;
+  end
+
+  initial begin
+    repeat (TIMEOUT) @(posedge clk);
+    $display("TIMEOUT");
+    $display("FAIL (%0d errors)", errors + 1);
     $finish;
   end
 endmodule
